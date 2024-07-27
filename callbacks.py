@@ -85,9 +85,16 @@ def modem_get_event(radio, cmd_val, args, ret_len=None):
     if evt_type == EVENT.WIFI:
         print("Wi-Fi scan done")
         # wifi result format is basic (9 bytes): wifi_type, channelInfo, RSSI, MAC6..MAC1
+        wifi_data = bytearray()  # save for geolocation solving
+        wifi_data.append(0x01)  # 0x00: MAC only; 0x01: MAC+RSSI
         for n in range(0, len(data), 9):
             rssi = to_sign_value(data[n+2])
             print('rssi: %s, MAC: %s' %(rssi, bytes2hexstr(data[n+3:n+9])))
+
+            wifi_data.append(data[n+2])
+            for x in data[n+3:n+9]:
+                wifi_data.append(x)
+        print('wifi_data:', wifi_data.hex().upper())
 
     elif evt_type == EVENT.NOEVENT:
         print("no event")
